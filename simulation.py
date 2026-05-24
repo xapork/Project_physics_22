@@ -368,52 +368,43 @@ save_fig(fig, "fig_series5_comparison.pdf")
 #   — вертикальная полоса = ось держится на одном угле (без трения)
 #   — петли смещаются влево = ось выпрямляется (с трением)
 
-print("Серия 6: фазовые портреты")
 
-fig, axes = plt.subplots(1, 2, figsize=(10, 5))
+print("6: фазовые портреты")
 
-for c_fr, col, lbl in [(0.0,  "blue", r"$C_{fr}=0$"),
-                        (0.05, "red",  r"$C_{fr}=0.05$")]:
+fig, axes = plt.subplots(2, 2, figsize=(12, 9))
 
-    # Здесь нужен полный вектор состояния (включая θ'),
-    # поэтому интегрируем вручную а не через функцию integrate()
+for row_i, (c_fr, col, lbl) in enumerate([(0.0,  "blue", r"$C_{fr}=0$ (без трения)"),
+                                            (0.05, "red",  r"$C_{fr}=0.05$ (с трением)")]):
     state = np.array([THETA0, DTHETA0, PHI0, DPHI0, N3_0])
     n_steps = int(T_END / DT)
-
-    # Массивы для хранения пар (θ, φ) и (θ, θ')
-    th_ph  = np.zeros((n_steps+1, 2))  # для правого графика
-    th_dth = np.zeros((n_steps+1, 2))  # для левого графика
-
-    th_ph[0]  = [state[0], state[2]]   # начальные θ и φ
-    th_dth[0] = [state[0], state[1]]   # начальные θ и θ'
-
+    th_ph  = np.zeros((n_steps+1, 2))
+    th_dth = np.zeros((n_steps+1, 2))
+    th_ph[0]  = [state[0], state[2]]
+    th_dth[0] = [state[0], state[1]]
     t = 0.0
     for i in range(n_steps):
         state = rk4_step(t, state, DT, ALPHA, c_fr)
         t += DT
-        th_ph[i+1]  = [state[0], state[2]]  # θ и φ
-        th_dth[i+1] = [state[0], state[1]]  # θ и θ'
+        th_ph[i+1]  = [state[0], state[2]]
+        th_dth[i+1] = [state[0], state[1]]
 
-    # Левый график: фазовый портрет (θ, θ')
-    axes[0].plot(np.degrees(th_dth[:, 0]), th_dth[:, 1],
-                 color=col, linewidth=0.7, label=lbl, alpha=0.8)
+    # Левый столбец — фазовый портрет (θ, θ')
+    axes[row_i, 0].plot(np.degrees(th_dth[:, 0]), th_dth[:, 1],
+                        color=col, linewidth=0.7, alpha=0.9)
+    axes[row_i, 0].set_xlabel(r"$\theta$, °")
+    axes[row_i, 0].set_ylabel(r"$\dot\theta$")
+    axes[row_i, 0].set_title(r"Фазовый портрет $(\theta,\dot\theta)$ — " + lbl)
+    axes[row_i, 0].grid(True, linestyle="--", alpha=0.5)
 
-    # Правый график: траектория (θ, φ)
-    axes[1].plot(np.degrees(th_ph[:, 0]), np.degrees(th_ph[:, 1]) % 360,
-                 color=col, linewidth=0.7, label=lbl, alpha=0.8, marker=",")
+    # Правый столбец — траектория (θ, φ)
+    axes[row_i, 1].plot(np.degrees(th_ph[:, 0]), np.degrees(th_ph[:, 1]) % 360,
+                        color=col, linewidth=0.7, alpha=0.9, marker=",")
+    axes[row_i, 1].set_xlabel(r"$\theta$, °")
+    axes[row_i, 1].set_ylabel(r"$\varphi$, °")
+    axes[row_i, 1].set_title(r"Траектория $(\theta,\varphi)$ — " + lbl)
+    axes[row_i, 1].grid(True, linestyle="--", alpha=0.5)
 
-axes[0].set_xlabel(r"$\theta$, °")
-axes[0].set_ylabel(r"$\dot\theta$")
-axes[0].set_title(r"Фазовый портрет $(\theta,\,\dot\theta)$")
-axes[0].legend()
-axes[0].grid(True, linestyle="--", alpha=0.5)
-
-axes[1].set_xlabel(r"$\theta$, °")
-axes[1].set_ylabel(r"$\varphi$, °")
-axes[1].set_title(r"Траектория в плоскости $(\theta,\,\varphi)$")
-axes[1].legend()
-axes[1].grid(True, linestyle="--", alpha=0.5)
-
+fig.suptitle("Фазовые портреты: сравнение движения без трения и с трением", fontsize=11)
 fig.tight_layout()
 save_fig(fig, "fig_series6_phase.pdf")
 
