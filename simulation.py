@@ -376,7 +376,8 @@ fig, axes = plt.subplots(2, 2, figsize=(12, 9))
 for row_i, (c_fr, col, lbl) in enumerate([(0.0,  "blue", r"$C_{fr}=0$ (без трения)"),
                                             (0.05, "red",  r"$C_{fr}=0.05$ (с трением)")]):
     state = np.array([THETA0, DTHETA0, PHI0, DPHI0, N3_0])
-    n_steps = int(T_END / DT)
+    t_plot = 5.0 if c_fr == 0.0 else T_END
+    n_steps = int(t_plot / DT)
     th_ph  = np.zeros((n_steps+1, 2))
     th_dth = np.zeros((n_steps+1, 2))
     th_ph[0]  = [state[0], state[2]]
